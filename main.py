@@ -24,3 +24,8 @@ from drug_detector import detect_drugs
 async def detect(text: dict):
     drugs = detect_drugs(text["text"])
     return {"drugs": drugs}
+from interaction import check_interactions
+
+@app.post("/check-interactions")
+async def check(drugs: list):
+    return check_interactions(drugs)
