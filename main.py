@@ -18,3 +18,9 @@ async def extract_text(file: UploadFile = File(...)):
     image = Image.open(io.BytesIO(await file.read()))
     text = pytesseract.image_to_string(image)
     return {"text": text}
+from drug_detector import detect_drugs
+
+@app.post("/detect-drugs")
+async def detect(text: dict):
+    drugs = detect_drugs(text["text"])
+    return {"drugs": drugs}
