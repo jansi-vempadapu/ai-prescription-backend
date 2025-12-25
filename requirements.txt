@@ -4,3 +4,4 @@ pillow
 pytesseract
 spacy
 requests
+python-multipart
