@@ -1,11 +1,16 @@
 import requests
 
+URL = "https://rxnav.nlm.nih.gov/REST/allconcepts.json?tty=IN+MIN"
+
 def get_drug_list():
-    url = "https://rxnav.nlm.nih.gov/REST/allconcepts.json?tty=IN+MIN"
-    res = requests.get(url).json()
-    drugs = set()
+    try:
+        res = requests.get(URL, timeout=10)
+        data = res.json()
+        drugs = set()
 
-    for item in res["minConceptGroup"]["minConcept"]:
-        drugs.add(item["name"].lower())
+        for item in data["minConceptGroup"]["minConcept"]:
+            drugs.add(item["name"].lower())
 
-    return drugs
+        return drugs
+    except:
+        return set()
