@@ -26,6 +26,11 @@ async def detect(text: dict):
     return {"drugs": drugs}
 from interaction import check_interactions
 
+from pydantic import BaseModel
+
+class DrugRequest(BaseModel):
+    drugs: list[str]
+
 @app.post("/check-interactions")
-async def check(drugs: list):
-    return check_interactions(drugs)
+async def check(payload: DrugRequest):
+    return check_interactions(payload.drugs)
