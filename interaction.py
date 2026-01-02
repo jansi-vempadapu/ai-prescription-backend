@@ -1,9 +1,14 @@
 import requests
 
+HEADERS = {
+    "User-Agent": "MedScanAI/1.0 (contact: student.project)"
+}
+
 def get_rxcui(drug):
     try:
         url = f"https://rxnav.nlm.nih.gov/REST/rxcui.json?name={drug}"
-        data = requests.get(url, timeout=10).json()
+        res = requests.get(url, headers=HEADERS, timeout=10)
+        data = res.json()
         return data["idGroup"]["rxnormId"][0]
     except:
         return None
@@ -17,14 +22,12 @@ def check_interactions(drugs):
             rxcuis.append(rxcui)
 
     if len(rxcuis) < 2:
-        return {
-            "risk": "LOW",
-            "warnings": []
-        }
+        return {"risk": "LOW", "warnings": []}
 
     try:
         url = "https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=" + "+".join(rxcuis)
-        data = requests.get(url, timeout=10).json()
+        res = requests.get(url, headers=HEADERS, timeout=10)
+        data = res.json()
 
         warnings = []
 
@@ -34,18 +37,9 @@ def check_interactions(drugs):
                     warnings.append(pair.get("description", ""))
 
         if warnings:
-            return {
-                "risk": "HIGH",
-                "warnings": warnings
-            }
+            return {"risk": "HIGH", "warnings": warnings}
         else:
-            return {
-                "risk": "LOW",
-                "warnings": []
-            }
+            return {"risk": "LOW", "warnings": []}
 
     except:
-        return {
-            "risk": "UNKNOWN",
-            "warnings": ["Unable to fetch interaction data"]
-        }
+        return {"risk": "UNKNOWN", "warnings": ["RxNav unavailable"]}
