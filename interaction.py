@@ -1,45 +1,33 @@
-import requests
+import csv
+from itertools import combinations
 
-HEADERS = {
-    "User-Agent": "MedScanAI/1.0 (contact: student.project)"
-}
+def check_interactions(drugs: list):
+    drugs = [d.lower().strip() for d in drugs]
 
-def get_rxcui(drug):
-    try:
-        url = f"https://rxnav.nlm.nih.gov/REST/rxcui.json?name={drug}"
-        res = requests.get(url, headers=HEADERS, timeout=10)
-        data = res.json()
-        return data["idGroup"]["rxnormId"][0]
-    except:
-        return None
+    interactions = []
 
-def check_interactions(drugs):
-    rxcuis = []
+    with open("drug_interactions.csv", newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
 
-    for drug in drugs:
-        rxcui = get_rxcui(drug)
-        if rxcui:
-            rxcuis.append(rxcui)
+        for row in reader:
+            d1 = row["drug1"].lower()
+            d2 = row["drug2"].lower()
 
-    if len(rxcuis) < 2:
-        return {"risk": "LOW", "warnings": []}
+            for a, b in combinations(drugs, 2):
+                if {a, b} == {d1, d2}:
+                    interactions.append({
+                        "drugs": [a, b],
+                        "description": row["interaction"],
+                        "level": row["level"]
+                    })
 
-    try:
-        url = "https://rxnav.nlm.nih.gov/REST/interaction/list.json?rxcuis=" + "+".join(rxcuis)
-        res = requests.get(url, headers=HEADERS, timeout=10)
-        data = res.json()
+    if interactions:
+        return {
+            "risk": max(i["level"] for i in interactions),
+            "interactions": interactions
+        }
 
-        warnings = []
-
-        for group in data.get("fullInteractionTypeGroup", []):
-            for itype in group.get("fullInteractionType", []):
-                for pair in itype.get("interactionPair", []):
-                    warnings.append(pair.get("description", ""))
-
-        if warnings:
-            return {"risk": "HIGH", "warnings": warnings}
-        else:
-            return {"risk": "LOW", "warnings": []}
-
-    except:
-        return {"risk": "UNKNOWN", "warnings": ["RxNav unavailable"]}
+    return {
+        "risk": "LOW",
+        "message": "No known interactions"
+    }

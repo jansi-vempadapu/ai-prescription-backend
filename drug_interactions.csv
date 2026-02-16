@@ -1,0 +1,7 @@
+drug1,drug2,interaction,level
+warfarin,ibuprofen,Increased risk of bleeding,HIGH
+warfarin,aspirin,Severe bleeding risk,HIGH
+aspirin,clopidogrel,Enhanced antiplatelet effect,MEDIUM
+metformin,contrast dye,Risk of lactic acidosis,HIGH
+ibuprofen,prednisone,Increased GI irritation,MEDIUM
+paracetamol,ibuprofen,Safe in normal doses,LOW
